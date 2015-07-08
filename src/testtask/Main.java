@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.StringTokenizer;
 
@@ -57,9 +58,9 @@ public class Main {
     }
 
 
-    //метод загружает сведения о клумбах и температурах срабатывания каждого датчика из файла в список
-    public List<Integer> load() throws IOException {
-        BufferedReader reader = new BufferedReader(new FileReader("bfs"));
+    //метод загружает сведения из файла
+    public List<Integer> load(String path) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(path));
         String str;
         //список, в котором хранятся значения температур срабатывания датчиков
         List<Integer> temperatureLimiters = new ArrayList<>();
@@ -69,12 +70,12 @@ public class Main {
             str = str.trim();
             //пропуск пустых строк и строк с комментариями
             if (str.isEmpty() || (str.charAt(0)) == '#') continue;
-            //добавление температуры для очередного датчика в список температур
+            //добавление температуры для очередного датчика в список
             try {
                 temperatureLimiters.add(new Integer(str));
             } catch (RuntimeException e) {
                 //если будет брошено исключение об ошибке преобразования, то пусть оно скажет о причине, т.е. о неправильных входных данных
-                throw new IOException("Incorrect data in file 'bfs'");
+                throw new IOException("Incorrect data in file "+path+".");
             }
         }
         return temperatureLimiters;
@@ -98,19 +99,30 @@ public class Main {
         return datas;
     }
 
+
+    public List<Machine> createMachines(String file) throws IOException {
+        List<Machine> machines = new ArrayList<>();
+        List<Integer> list = load(file);
+        if(list.isEmpty()) throw new IOException("Incorrect data in file "+file+".");
+        int N=list.get(0);
+        for(int i = 0; i<N; i++)
+        {
+            Machine machine = new Machine(i,System.out);
+            machines.add(machine);
+        }
+        return  machines;
+    }
+
     public static void main(String... args) {
         Main main = new Main();
         //Система садовник
         Gardener gardener = new Gardener();
-        //Машина полива. Машина полива будет выводить сведения о работе в указанный поток.
-        Machine machine = new Machine(System.out);
-        //садовнику дали машину полива
-        gardener.setMachine(machine);
         //садовник должен знать текущее время программы. Он будет получать оповещения, когда настало время, когда готова очередня машина
         Time.getInstance().addObserver(gardener);
         //Запуск программы
         try {
-            main.tacts(main.initialise(main.load(), gardener));
+            gardener.setMachines(new LinkedList<Machine>(main.createMachines("machines")));
+            main.tacts(main.initialise(main.load("bfs"), gardener));
         } catch (Exception e) {
             System.out.print("Something went wrong =( : " + e.getMessage());
         }

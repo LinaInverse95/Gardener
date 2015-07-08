@@ -7,22 +7,28 @@ import java.io.PrintStream;
  */
 public class Machine {
 
+    int N;
     //Поток вывода информации о действия машины
     PrintStream out;
 
-    public Machine(PrintStream out) {
-        this.out = out;
+    public Machine(int N, PrintStream out) {
+        this.N = N; this.out = out;
     }
 
     //Переместиться к клумбе
-    public void move(BedFlower bedFlower)
-    {
-        out.println(Time.getInstance().getTact() +" MoveTo "+ bedFlower);
+    public void move(BedFlower bedFlower, int tact) {
+        out.println("Machine #"+ N+ "  "+tact + " MoveTo " + bedFlower);
     }
 
     //полить клумбу
-    public void pour(BedFlower bedFlower)
-    {
-        out.println(Time.getInstance().getTact()+5 +" Pour "+ bedFlower);
+    public void pour(BedFlower bedFlower, int tact) {
+        out.println("Machine #"+ N+ "  "+tact + " Pour " + bedFlower);
+    }
+
+    @Override
+    public String toString() {
+        return "Machine{" +
+                "N=" + N +
+                '}';
     }
 }
