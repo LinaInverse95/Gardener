@@ -1,15 +1,14 @@
 package testtask;
 
-import java.util.LinkedList;
-import java.util.Observable;
-import java.util.Observer;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Created by ALUCARA on 07.07.2015.
  */
 public class Gardener implements Observer {
 
+    //“аблица времени перемещени€ между клумбами
+    List<int[]> movements;
     //ѕоливальна€ машина, обслуживающа€ текущий запрос
     Machine machine;
     //врем€, в которое текуща€ машина будет готова полить еще одну клумбу
@@ -25,6 +24,14 @@ public class Gardener implements Observer {
         //—начала все машины доступны
         for (int i = 0; i < machines.size(); i++)
             readies.push(0);
+    }
+
+    public List<int[]> getMovements() {
+        return movements;
+    }
+
+    public void setMovements(List<int[]> movements) {
+        this.movements = movements;
     }
 
     //ќчередь клумб, которые надо полить. ‘ормируетс€, т.к. между оповещени€ми будет слишком мало времени,
@@ -59,12 +66,22 @@ public class Gardener implements Observer {
             // оманда машине переместитьс€ к клумбе и полить цветы.
             //—оответственно вычисл€етс€ и сохран€етс€ значение времени, когда машина будет готова.
             ready = Time.getInstance().getTact();
+
+            int a = machine.getCurrentBf().getId();
+            int b = bf.getId();
+            int c = 0;
+
+            if (a>b) c = movements.get(a)[b];
+            if (a<b) c = movements.get(b)[a];
             machine.move(bf, ready);
-            ready+=5;
+
+            ready += c;
             machine.pour(bf, ready);
             ready += 10;
+
             readies.poll();
             readies.add(0, ready);
+            //machine.setCurrentBf(bf);
             //теперь машины, которым требуетс€ больше всего времени, чтобы освободитьс€, наход€тс€ в конце очереди
             machines.add(machines.poll());
             readies.add(readies.poll());
@@ -75,7 +92,7 @@ public class Gardener implements Observer {
             //Ќужно подождать момента, пока машина не освободитс€
             if (ready < Time.getInstance().getTact()) {
                 readies.poll();
-                ready = Time.getInstance().getTact();
+                ready = Time.getInstance().getTact()+1;
                 readies.add(0, ready);
             }
             if (!bedFlowers.isEmpty()) {

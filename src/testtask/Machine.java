@@ -7,17 +7,21 @@ import java.io.PrintStream;
  */
 public class Machine {
 
+    //текущее метоположение поливальной машины
+    BedFlower currentBf;
+
     int N;
     //Поток вывода информации о действия машины
     PrintStream out;
 
-    public Machine(int N, PrintStream out) {
-        this.N = N; this.out = out;
+    public Machine(int N, PrintStream out, BedFlower firstBf) {
+        this.N = N; this.out = out;this.currentBf = firstBf;
     }
 
     //Переместиться к клумбе
     public void move(BedFlower bedFlower, int tact) {
         out.println("Machine #"+ N+ "  "+tact + " MoveTo " + bedFlower);
+        currentBf = bedFlower;
     }
 
     //полить клумбу
@@ -30,5 +34,13 @@ public class Machine {
         return "Machine{" +
                 "N=" + N +
                 '}';
+    }
+
+    public BedFlower getCurrentBf() {
+        return currentBf;
+    }
+
+    public void setCurrentBf(BedFlower currentBf) {
+        this.currentBf = currentBf;
     }
 }

@@ -100,17 +100,45 @@ public class Main {
     }
 
 
-    public List<Machine> createMachines(String file) throws IOException {
+    public List<Machine> createMachines(String file, BedFlower first) throws IOException {
         List<Machine> machines = new ArrayList<>();
         List<Integer> list = load(file);
         if(list.isEmpty()) throw new IOException("Incorrect data in file "+file+".");
         int N=list.get(0);
         for(int i = 0; i<N; i++)
         {
-            Machine machine = new Machine(i,System.out);
+            Machine machine = new Machine(i,System.out, first);
             machines.add(machine);
         }
         return  machines;
+    }
+
+    //Информацию о перемещениях между клумбами считали в матрицу
+    public List<int[]> readAboutMovements(String file) throws IOException {
+        BufferedReader reader = new BufferedReader(new FileReader(file));
+        String str;
+        List<int[]> movements = new ArrayList<>();
+
+        while ((str = reader.readLine()) != null) {
+            //убрать лишние пробелы в начале и конце
+            str = str.trim();
+            //пропуск пустых строк и строк с комментариями
+            if (str.isEmpty() || (str.charAt(0)) == '#') continue;
+            //строки будет разбирать по токенам, т.к. между словами может быть несколько пробелов и знаки табуляции
+            StringTokenizer tokenizer = new StringTokenizer(str, " \n\t\r");
+            int[] ints = new int[tokenizer.countTokens()];
+            for (int i = 0; i < ints.length; i++) {
+                try {
+                    ints[i] = new Integer((String) tokenizer.nextElement());
+
+                } catch (RuntimeException e) {
+                    //если будет брошено исключение об ошибке преобразования, то пусть оно скажет о причине, т.е. о неправильных входных данных
+                    throw new IOException("Incorrect data in file " + file);
+                }
+            }
+            movements.add(ints);
+        }
+        return movements;
     }
 
     public static void main(String... args) {
@@ -121,8 +149,11 @@ public class Main {
         Time.getInstance().addObserver(gardener);
         //Запуск программы
         try {
-            gardener.setMachines(new LinkedList<Machine>(main.createMachines("machines")));
-            main.tacts(main.initialise(main.load("bfs"), gardener));
+            List<WeatherData> datas = main.initialise(main.load("bfs"), gardener);
+            BedFlower first = datas.get(0).getBedFlower();
+            gardener.setMachines(new LinkedList<Machine>(main.createMachines("machines", first)));
+            gardener.setMovements(main.readAboutMovements("movements"));
+            main.tacts(datas);
         } catch (Exception e) {
             System.out.print("Something went wrong =( : " + e.getMessage());
         }
